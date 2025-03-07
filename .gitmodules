@@ -1,0 +1,27 @@
+[submodule "FLAF"]
+	path = FLAF
+	url = git@github.com:cms-flaf/Framework.git
+[submodule "HHbtag"]
+	path = HHbtag
+	url = ssh://git@gitlab.cern.ch:7999/hh/bbtautau/hh-btag.git
+[submodule "Corrections"]
+	path = Corrections
+	url = git@github.com:cms-flaf/Corrections.git
+[submodule "SyncTool"]
+	path = SyncTool
+	url = git@github.com:cms-flaf/SyncTool.git
+[submodule "ClassicSVfit"]
+	path = ClassicSVfit
+	url = git@github.com:cms-flaf/ClassicSVfit.git
+[submodule "SVfitTF"]
+	path = SVfitTF
+	url = git@github.com:cms-flaf/SVfitTF.git
+[submodule "HHKinFit2"]
+	path = HHKinFit2
+	url = git@github.com:cms-flaf/HHKinFit2.git
+[submodule "StatInference"]
+	path = StatInference
+	url = git@github.com:cms-flaf/StatInference.git
+[submodule "inference"]
+	path = inference
+	url = ssh://git@gitlab.cern.ch:7999/hh/tools/inference.git
