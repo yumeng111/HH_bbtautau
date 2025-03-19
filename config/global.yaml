@@ -133,7 +133,7 @@ triggers:
   muTau: [singleMu, mutau]
   tauTau: [ditau]#, ditaujet]
   eE: [singleEle]
-  eMu: [singleEle, singleMu]
+  eMu: [singleMu]
   muMu: [singleMu]
 
 hist_triggers:
