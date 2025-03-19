@@ -7,53 +7,6 @@ from FLAF.Analysis.GetCrossWeights import *
 # from Analysis.GetTauTauWeights import *
 from FLAF.Common.Utilities import *
 
-
-WorkingPointsParticleNet = {
-        "Run2_2018":{
-            "Loose":0.9172,
-            "Medium":0.9734,
-            "Tight":0.988
-        },
-        "Run2_2017":{
-            "Loose":0.9105,
-            "Medium":0.9714,
-            "Tight":0.987
-        },
-        "Run2_2016":{
-            "Loose":0.9137,
-            "Medium":0.9735,
-            "Tight":0.9883
-        },
-        "Run2_2016_HIPM":{
-            "Loose":0.9088,
-            "Medium":0.9737,
-            "Tight":0.9883
-        },
-    }
-WorkingPointsDeepFlav = {
-        "Run2_2018":{
-            "Loose":0.049,
-            "Medium":0.2783,
-            "Tight":0.71
-        },
-        "Run2_2017":{
-            "Loose":0.0532,
-            "Medium":0.304,
-            "Tight":0.7476
-        },
-        "Run2_2016_HIPM":{
-            "Loose":0.0508,
-            "Medium":0.2598,
-            "Tight":0.6502
-        },
-        "Run2_2016":{
-            "Loose":0.048,
-            "Medium":0.2489,
-            "Tight":0.6377
-        },
-    }
-
-
 def createKeyFilterDict(global_cfg_dict, year):
     reg_dict = {}
     filter_str = ""
@@ -97,7 +50,7 @@ def GetWeight(channel, cat, boosted_categories):
     trg_weights_dict = {
         'eTau':["weight_HLT_eTau", "weight_HLT_singleTau", "weight_HLT_MET"],
         'muTau':["weight_HLT_muTau", "weight_HLT_singleTau", "weight_HLT_MET"],
-        'tauTau':["weight_HLT_diTau", "weight_HLT_singleTau", "weight_HLT_MET"],
+        'tauTau':["weight_HLT_diTau", "weight_HLT_diTauJet", "weight_HLT_singleTau", "weight_HLT_MET"],
         'eE':["weight_HLT_singleEle"],
         'muMu':["weight_HLT_singleMu"],
         'eMu':["weight_HLT_eMu"]
@@ -174,7 +127,7 @@ class DataFrameBuilderForHistograms(DataFrameBuilderBase):
         singleTau_th_dict = self.config['singleTau_th']
         singleMu_th_dict = self.config['singleMu_th']
         singleEle_th_dict = self.config['singleEle_th']
-        legacy_region_definition= "( ( eTau && (SingleEle_region  || CrossEleTau_region) ) || ( muTau && (SingleMu_region  || CrossMuTau_region) ) || ( tauTau && ( diTau_region ) ) || ( eE && (SingleEle_region)) || (eMu && ( SingleEle_region || SingleMu_region ) ) || (muMu && (SingleMu_region)) )"
+        legacy_region_definition= "( ( eTau && (SingleEle_region  || CrossEleTau_region) ) || ( muTau && (SingleMu_region  || CrossMuTau_region) ) || ( tauTau && ( diTau_region || diTauJet_region) ) || ( eE && (SingleEle_region)) || (eMu && ( SingleEle_region || SingleMu_region ) ) || (muMu && (SingleMu_region)) )"
         #legacy_region_definition= "( ( eTau && (SingleEle_region ) ) || ( muTau && (SingleMu_region ) ) || ( tauTau && ( diTau_region ) ) || ( eE && (SingleEle_region)) || (eMu && ( SingleEle_region || SingleMu_region ) ) || (muMu && (SingleMu_region)) )" # if not including xtrgs
         for reg_name, reg_exp in self.config['application_regions'].items():
             self.df = self.df.Define(reg_name, reg_exp.format(tau_th=singleTau_th_dict[self.period], ele_th=singleEle_th_dict[self.period], mu_th=singleMu_th_dict[self.period]))
@@ -259,7 +212,7 @@ class DataFrameBuilderForHistograms(DataFrameBuilderBase):
         self.df = self.df.Define("muon1_tightId", "if(muTau || muMu) {return (tau1_Muon_tightId && tau1_Muon_pfRelIso04_all < 0.15); } return true;")
         self.df = self.df.Define("muon2_tightId", "if(muMu || eMu) {return (tau2_Muon_tightId && tau2_Muon_pfRelIso04_all < 0.3);} return true;")
         self.df = self.df.Define("firstele_mvaIso", "if(eMu || eE){return tau1_Electron_mvaIso_WP80==1 && tau1_Electron_pfRelIso03_all < 0.15 ; } return true; ")
-        self.df = self.df.Define("tau1_iso_medium", f"if(tauTau) return (tau1_idDeepTau{self.deepTauYear()}{self.deepTauVersion}VSjet >= {Utilities.WorkingPointsTauVSjet.Medium.value}); return true;")
+        self.df = self.df.Define("tau1_iso_medium", f"if(tauTau) return (tau1_idDeepTau{self.deepTauYear()}v{self.deepTauVersion}VSjet >= {Utilities.WorkingPointsTauVSjet.Medium.value}); return true;")
         if f"tau1_gen_kind" not in self.df.GetColumnNames():
             self.df=self.df.Define("tau1_gen_kind", "if(isData) return 5; return 0;")
         if f"tau2_gen_kind" not in self.df.GetColumnNames():
@@ -271,9 +224,9 @@ class DataFrameBuilderForHistograms(DataFrameBuilderBase):
         self.df = self.df.Define("OS", "tau1_charge*tau2_charge < 0")
         self.df = self.df.Define("SS", "!OS")
 
-        self.df = self.df.Define("Iso", f"(((tauTau || eTau || muTau) && (tau2_idDeepTau{self.deepTauYear()}{self.deepTauVersion}VSjet >= {Utilities.WorkingPointsTauVSjet.Medium.value} )) || ((muMu||eMu) && (tau2_Muon_pfRelIso04_all < 0.15)) || (eE && tau2_Electron_pfRelIso03_all < 0.15 && tau2_Electron_mvaNoIso_WP80))")
+        self.df = self.df.Define("Iso", f"(((tauTau || eTau || muTau) && (tau2_idDeepTau{self.deepTauYear()}v{self.deepTauVersion}VSjet >= {Utilities.WorkingPointsTauVSjet.Medium.value} )) || ((muMu||eMu) && (tau2_Muon_pfRelIso04_all < 0.15)) || (eE && tau2_Electron_pfRelIso03_all < 0.15 && tau2_Electron_mvaNoIso_WP80))")
 
-        self.df = self.df.Define("AntiIso", f"(((tauTau || eTau || muTau) && (tau2_idDeepTau{self.deepTauYear()}{self.deepTauVersion}VSjet >= {Utilities.WorkingPointsTauVSjet.VVVLoose.value} && tau2_idDeepTau{self.deepTauYear()}{self.deepTauVersion}VSjet < {Utilities.WorkingPointsTauVSjet.Medium.value})) || ((muMu||eMu) && (tau2_Muon_pfRelIso04_all >= 0.15 && tau2_Muon_pfRelIso04_all < 0.3) ) || (eE && (tau2_Electron_pfRelIso03_all < 0.3 && tau2_Electron_pfRelIso03_all >= 0.15 && tau2_Electron_mvaNoIso_WP80 )))")
+        self.df = self.df.Define("AntiIso", f"(((tauTau || eTau || muTau) && (tau2_idDeepTau{self.deepTauYear()}v{self.deepTauVersion}VSjet >= {Utilities.WorkingPointsTauVSjet.VVVLoose.value} && tau2_idDeepTau{self.deepTauYear()}v{self.deepTauVersion}VSjet < {Utilities.WorkingPointsTauVSjet.Medium.value})) || ((muMu||eMu) && (tau2_Muon_pfRelIso04_all >= 0.15 && tau2_Muon_pfRelIso04_all < 0.3) ) || (eE && (tau2_Electron_pfRelIso03_all < 0.3 && tau2_Electron_pfRelIso03_all >= 0.15 && tau2_Electron_mvaNoIso_WP80 )))")
 
         self.df = self.df.Define("OS_Iso", f"lepton_preselection && OS && Iso")
         self.df = self.df.Define("SS_Iso", f"lepton_preselection && SS && Iso")
@@ -281,7 +234,7 @@ class DataFrameBuilderForHistograms(DataFrameBuilderBase):
         self.df = self.df.Define("SS_AntiIso", f"lepton_preselection && SS && AntiIso")
 
     def deepTauYear(self):
-        return self.config['deepTauYears'][self.deepTauVersion]
+        return self.config['deepTauYears'][f'v{self.deepTauVersion}']
 
     def addNewCols(self):
         self.colNames = []

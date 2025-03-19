@@ -2,38 +2,38 @@
   types:
     - QCD
   title: QCD
-  color: kOrange-3
+  color: kBlue-10
 - name: DY
   types:
     - DY
   title: "DY #rightarrow ll + jets"
-  color: kAzure+10
+  color: kAzure-9
 - name: TT
   types:
     - TT
   title: t#bar{t}
-  color: kGreen+3
+  color: kSpring+5
 - name: ST
   types:
     - ST
   title: "ST"
-  color: kTeal-9
+  color: kYellow-9
 - name: VV
   types:
     - VV
   title: "VV"
-  color: kPink+1
+  color: kOrange-4
 - name: single_H
   title: "H"
   types:
     - ttH
     - VH
     - H
-  color: kRed-7
+  color: kRed-10
 - name: Other
   title: "Other"
   types: []
-  color: kViolet+4
+  color: kPink+2
 - name: GluGluToBulkGraviton_1250
   title: "GGBG-1250"
   type: signal
@@ -58,7 +58,7 @@
   type: signal
   types:
    - GluGluToRadion
-  color: kGreen
+  color: kGreen+2
 - name: data
   title: "data obs"
   types:
