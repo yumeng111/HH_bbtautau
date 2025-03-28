@@ -22,6 +22,8 @@ vars_to_plot:
 - tautau_m_vis
 - bb_m_vis
 - bbtautau_mass
+- b1_pt
+- b2_pt
 - { "name" : MT2, need_cache: true }
 # - { "name": SVfit_m, need_cache: true }
 # - { "name": kinFit_m, need_cache: true }
