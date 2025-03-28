@@ -1,15 +1,15 @@
 fs_default:
-    - 'T3_CH_CERNBOX:/store/user/kandroso/HH_bbtautau_Run3/'
+    - 'T3_CH_CERNBOX:/store/user/yumeng/HH_bbtautau_Run3/'
 fs_anaCache:
-    - 'T3_CH_CERNBOX:/store/user/kandroso/HH_bbtautau_Run3/'
+    - 'T3_CH_CERNBOX:/store/user/yumeng/HH_bbtautau_Run3/'
 fs_anaTuple:
-    - 'T3_CH_CERNBOX:/store/user/kandroso/HH_bbtautau_Run3/'
+    - 'T3_CH_CERNBOX:/store/user/yumeng/HH_bbtautau_Run3/'
 fs_anaCacheTuple:
-    - 'T3_CH_CERNBOX:/store/user/kandroso/HH_bbtautau_Run3/'
+    - 'T3_CH_CERNBOX:/store/user/yumeng/HH_bbtautau_Run3/'
 fs_histograms:
-    - 'T3_CH_CERNBOX:/store/user/kandroso/HH_bbtautau_Run3/histograms/'
+    - 'T3_CH_CERNBOX:/store/user/yumeng/HH_bbtautau_Run3/histograms/'
 fs_json:
-- 'T3_CH_CERNBOX:/store/user/kandroso/HH_bbtautau_Run3/jsonFiles/'
+- 'T3_CH_CERNBOX:/store/user/yumeng/HH_bbtautau_Run3/jsonFiles/'
 
 analysis_config_area: config
 compute_unc_variations: true

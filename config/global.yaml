@@ -1,8 +1,9 @@
 anaTupleDef: AnaProd/anaTupleDef.py
 analysis_import: Analysis.hh_bbtautau
 signal_types:
-  - GluGluToRadion
-  - GluGluToBulkGraviton
+  #- GluGluToRadion
+  #- GluGluToBulkGraviton
+  - HHnonRes
   #- VBFToRadion
   #- VBFToBulkGraviton
 genuineTau_SFtype:
