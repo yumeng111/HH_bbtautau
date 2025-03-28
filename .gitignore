@@ -1,5 +1,8 @@
 /soft
 /data
 /.law
-__pycache__Corrections/data/JECDatabase/
+/config/user_custom.yaml
+__pycache__
+Corrections/data/JECDatabase/
 Corrections/data/JRDatabase/
+
