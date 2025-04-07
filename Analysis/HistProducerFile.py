@@ -40,8 +40,6 @@ def createCentralQuantities(df_central, central_col_types, central_columns):
     map_creator = ROOT.analysis.MapCreator(*central_col_types)()
     df_central = map_creator.processCentral(ROOT.RDF.AsRNode(df_central), Utilities.ListToVector(central_columns), 1)
     #df_central = map_creator.getEventIdxFromShifted(ROOT.RDF.AsRNode(df_central))
-    # print(f'df_central.Describe() {df_central.Describe()}')
-    # print(f'df_central.Filter("HLT_ditau==1").Count().GetValue() {df_central.Filter("HLT_ditau==1").Count().GetValue()}')
     return df_central
 
 def SaveHists(histograms, out_file, categories_to_save):
@@ -65,9 +63,7 @@ def SaveHists(histograms, out_file, categories_to_save):
 
 def GetHistogramDictFromDataframes(var, all_dataframes, key_2 , key_filter_dict, unc_cfg_dict, hist_cfg_dict, global_cfg_dict, furtherCut='', verbose=False):
     dataframes = all_dataframes[key_2]
-    # print(f'debug-6: dataframes[0].Describe() {dataframes[0].Describe()}')
     sample_type,uncName,scale = key_2
-    print(f'debug: sample_type {sample_type}, uncName {uncName}, scale {scale}')
     isCentral = 'Central' in key_2
     # print(f"key2 is {key_2}")
     histograms = {}
@@ -85,15 +81,14 @@ def GetHistogramDictFromDataframes(var, all_dataframes, key_2 , key_filter_dict,
 
     for key_1,key_cut in key_filter_dict.items():
         ch, reg, cat = key_1
-        print(f'debug: ch {ch}, reg {reg}, cat {cat}')
+        print(f'ch {ch}, reg {reg}, cat {cat}')
         if cat not in all_categories: continue
         if ch not in global_cfg_dict['channels_to_consider'] : continue
         if (key_1, key_2) in histograms.keys(): continue
 
         if var in boosted_variables and uncName in unc_to_not_consider_boosted: continue
         total_weight_expression = analysis.GetWeight(ch,cat,boosted_categories) if sample_type!='data' else "1"
-        # print(f'debug: total_weight_expression: {total_weight_expression}')
-
+    
         weight_name = "final_weight"
         if not isCentral:
             if type(unc_cfg_dict)==dict:
@@ -104,23 +99,48 @@ def GetHistogramDictFromDataframes(var, all_dataframes, key_2 , key_filter_dict,
 
         # print(f'debug: dataframes {dataframes}')
         for dataframe in dataframes:
-            print(f'debug: len(dataframes) {len(dataframes)}')
             if furtherCut != '' : key_cut += f' && {furtherCut}'
-            # print(f'debug-4: dataframe.GetColumnNames() {dataframe.GetColumnNames()}') #this prints fine for category loop, but breaks in the next line after one loop
-            print(f'debug-3: dataframe.Count().GetValue() {dataframe.Count().GetValue()}')
             dataframe_new = dataframe.Filter(key_cut)
-            print(f'debug-2: dataframe_new.Count().GetValue() {dataframe_new.Count().GetValue()}')
             btag_weight = analysis.GetBTagWeight(global_cfg_dict,cat,applyBtag=False) if sample_type!='data' else "1"
-            print(f'debug: btag_weight {btag_weight}')
             total_weight_expression = "*".join([total_weight_expression,btag_weight])
             # dataframe_new = dataframe_new.Define(f"final_weight_0_{ch}_{cat}_{reg}", f"{total_weight_expression}") # no need to define it twice
-            print(f'debug-1: dataframe_new.Count().GetValue() {dataframe_new.Count().GetValue()}')
             dataframe_new = dataframe_new.Filter(f"{cat}")
-            print(f'debug: dataframe_new.Count().GetValue() {dataframe_new.Count().GetValue()}')
-            print(f'debug: can it filter? dataframe_new.Describe():')
-            # print(dataframe_new.Describe())
-            print(f'debug: dataframe_new.Display("btag_shape").Print(): {dataframe_new.Display({"inclusive","btag_shape","baseline","boosted_baseline","boosted_baseline_cat3","inclusive_masswindow","btag_shape_masswindow","baseline_masswindow"}).AsString()}')
-            histograms[(key_1, key_2)].append(dataframe_new.Define("final_weight", total_weight_expression).Define("weight_for_hists", f"{weight_name}").Histo1D(GetModel(hist_cfg_dict, var), var, "weight_for_hists"))
+            dataframe_new = dataframe_new.Define("final_weight", total_weight_expression)
+            print("Loop loop loop but the second one")
+            print(this_dataframe.Count().GetValue())
+            print(this_dataframe.Count().GetValue())
+            print(this_dataframe.Count().GetValue())
+            print("Fine so its breaking on final weight")
+            print("What was it equal to?")
+            print(total_weight_expression)
+            print("So now lets check each of those values")
+            list_weight_expression = total_weight_expression.split("*")
+            column_names = dataframe_new.GetColumnNames()
+            for this_weight in list_weight_expression:
+                print(f"We are on {this_weight}")
+                print(f"Is it in the colum names?")
+                print(this_weight in column_names)
+            print("What about final_weight")
+            print("final_weight" in column_names)
+            print(dataframe_new.Display("final_weight").Print())
+            dataframe_new = dataframe_new.Define("weight_for_hists", f"{weight_name}")
+            print("Loop loop loop but the third one")
+            print(this_dataframe.Count().GetValue())
+            print(this_dataframe.Count().GetValue())
+            print(this_dataframe.Count().GetValue())
+            histograms[(key_1, key_2)].append(dataframe_new.Histo1D(GetModel(hist_cfg_dict, var), var, "weight_for_hists"))
+
+            # histograms[(key_1, key_2)].append(dataframe_new.Define("final_weight", total_weight_expression).Define("weight_for_hists", f"{weight_name}").Histo1D(GetModel(hist_cfg_dict, var), var, "weight_for_hists"))
+            print("What was all that final weight shiz")
+            print(total_weight_expression)
+            print("and the weight name?")
+            print(weight_name)
+            print("So the histograms are now")
+            print(histograms)
+            print("Loop loop loop")
+            print(this_dataframe.Count().GetValue())
+            print(this_dataframe.Count().GetValue())
+            print(this_dataframe.Count().GetValue())
     return histograms
 
 def GetShapeDataFrameDict(all_dataframes, global_cfg_dict, key, key_central, file_keys, inFile, inFileCache, compute_variations, period, deepTauVersion, colNames, colTypes, region, isData, datasetType,hasCache=True ):
