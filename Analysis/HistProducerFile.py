@@ -65,7 +65,9 @@ def SaveHists(histograms, out_file, categories_to_save):
 
 def GetHistogramDictFromDataframes(var, all_dataframes, key_2 , key_filter_dict, unc_cfg_dict, hist_cfg_dict, global_cfg_dict, furtherCut='', verbose=False):
     dataframes = all_dataframes[key_2]
+    # print(f'debug-6: dataframes[0].Describe() {dataframes[0].Describe()}')
     sample_type,uncName,scale = key_2
+    print(f'debug: sample_type {sample_type}, uncName {uncName}, scale {scale}')
     isCentral = 'Central' in key_2
     # print(f"key2 is {key_2}")
     histograms = {}
@@ -90,6 +92,7 @@ def GetHistogramDictFromDataframes(var, all_dataframes, key_2 , key_filter_dict,
 
         if var in boosted_variables and uncName in unc_to_not_consider_boosted: continue
         total_weight_expression = analysis.GetWeight(ch,cat,boosted_categories) if sample_type!='data' else "1"
+        # print(f'debug: total_weight_expression: {total_weight_expression}')
 
         weight_name = "final_weight"
         if not isCentral:
@@ -99,15 +102,24 @@ def GetHistogramDictFromDataframes(var, all_dataframes, key_2 , key_filter_dict,
         if (key_1, key_2) not in histograms.keys():
             histograms[(key_1, key_2)] = []
 
+        # print(f'debug: dataframes {dataframes}')
         for dataframe in dataframes:
+            print(f'debug: len(dataframes) {len(dataframes)}')
             if furtherCut != '' : key_cut += f' && {furtherCut}'
+            # print(f'debug-4: dataframe.GetColumnNames() {dataframe.GetColumnNames()}') #this prints fine for category loop, but breaks in the next line after one loop
+            print(f'debug-3: dataframe.Count().GetValue() {dataframe.Count().GetValue()}')
             dataframe_new = dataframe.Filter(key_cut)
+            print(f'debug-2: dataframe_new.Count().GetValue() {dataframe_new.Count().GetValue()}')
             btag_weight = analysis.GetBTagWeight(global_cfg_dict,cat,applyBtag=False) if sample_type!='data' else "1"
             print(f'debug: btag_weight {btag_weight}')
             total_weight_expression = "*".join([total_weight_expression,btag_weight])
             # dataframe_new = dataframe_new.Define(f"final_weight_0_{ch}_{cat}_{reg}", f"{total_weight_expression}") # no need to define it twice
-            print(f'debug: dataframe_new.Display().Print(): {dataframe_new.Display(f"{cat}").Print()}')
+            print(f'debug-1: dataframe_new.Count().GetValue() {dataframe_new.Count().GetValue()}')
             dataframe_new = dataframe_new.Filter(f"{cat}")
+            print(f'debug: dataframe_new.Count().GetValue() {dataframe_new.Count().GetValue()}')
+            print(f'debug: can it filter? dataframe_new.Describe():')
+            # print(dataframe_new.Describe())
+            print(f'debug: dataframe_new.Display("btag_shape").Print(): {dataframe_new.Display({"inclusive","btag_shape","baseline","boosted_baseline","boosted_baseline_cat3","inclusive_masswindow","btag_shape_masswindow","baseline_masswindow"}).AsString()}')
             histograms[(key_1, key_2)].append(dataframe_new.Define("final_weight", total_weight_expression).Define("weight_for_hists", f"{weight_name}").Histo1D(GetModel(hist_cfg_dict, var), var, "weight_for_hists"))
     return histograms
 
@@ -288,9 +300,11 @@ if __name__ == "__main__":
         col_names_central =  dfWrapped_central.colNames
         col_types_central =  dfWrapped_central.colTypes
         new_dfWrapped_Central = analysis.PrepareDfForHistograms(dfWrapped_central)
+        print(f'debug-5: new_dfWrapped_Central.df: {new_dfWrapped_Central.df.Count().GetValue()}')
         if key_central not in all_dataframes:
 
             all_dataframes[key_central] = [new_dfWrapped_Central.df]
+            print(f'debug-5a: new_dfWrapped_Central.df: {new_dfWrapped_Central.df.Count().GetValue()}')
         central_histograms = GetHistogramDictFromDataframes(args.var, all_dataframes,  key_central , key_filter_dict, unc_cfg_dict['norm'],hist_cfg_dict, global_cfg_dict, args.furtherCut, False)
 
         # central quantities definition
