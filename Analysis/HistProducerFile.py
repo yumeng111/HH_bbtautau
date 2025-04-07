@@ -5,7 +5,6 @@ import math
 import shutil
 import time
 ROOT.EnableThreadSafety()
-ROOT.EnableImplicitMT()
 
 from FLAF.RunKit.run_tools import ps_call
 if __name__ == "__main__":
@@ -41,8 +40,8 @@ def createCentralQuantities(df_central, central_col_types, central_columns):
     map_creator = ROOT.analysis.MapCreator(*central_col_types)()
     df_central = map_creator.processCentral(ROOT.RDF.AsRNode(df_central), Utilities.ListToVector(central_columns), 1)
     #df_central = map_creator.getEventIdxFromShifted(ROOT.RDF.AsRNode(df_central))
-    print(f'df_central.Describe() {df_central.Describe()}')
-    print(f'df_central.Filter("HLT_ditau==1").Count().GetValue() {df_central.Filter("HLT_ditau==1").Count().GetValue()}')
+    # print(f'df_central.Describe() {df_central.Describe()}')
+    # print(f'df_central.Filter("HLT_ditau==1").Count().GetValue() {df_central.Filter("HLT_ditau==1").Count().GetValue()}')
     return df_central
 
 def SaveHists(histograms, out_file, categories_to_save):
@@ -84,6 +83,7 @@ def GetHistogramDictFromDataframes(var, all_dataframes, key_2 , key_filter_dict,
 
     for key_1,key_cut in key_filter_dict.items():
         ch, reg, cat = key_1
+        print(f'debug: ch {ch}, reg {reg}, cat {cat}')
         if cat not in all_categories: continue
         if ch not in global_cfg_dict['channels_to_consider'] : continue
         if (key_1, key_2) in histograms.keys(): continue
@@ -103,8 +103,10 @@ def GetHistogramDictFromDataframes(var, all_dataframes, key_2 , key_filter_dict,
             if furtherCut != '' : key_cut += f' && {furtherCut}'
             dataframe_new = dataframe.Filter(key_cut)
             btag_weight = analysis.GetBTagWeight(global_cfg_dict,cat,applyBtag=False) if sample_type!='data' else "1"
+            print(f'debug: btag_weight {btag_weight}')
             total_weight_expression = "*".join([total_weight_expression,btag_weight])
             # dataframe_new = dataframe_new.Define(f"final_weight_0_{ch}_{cat}_{reg}", f"{total_weight_expression}") # no need to define it twice
+            print(f'debug: dataframe_new.Display().Print(): {dataframe_new.Display(f"{cat}").Print()}')
             dataframe_new = dataframe_new.Filter(f"{cat}")
             histograms[(key_1, key_2)].append(dataframe_new.Define("final_weight", total_weight_expression).Define("weight_for_hists", f"{weight_name}").Histo1D(GetModel(hist_cfg_dict, var), var, "weight_for_hists"))
     return histograms
@@ -294,11 +296,19 @@ if __name__ == "__main__":
         # central quantities definition
         compute_variations = ( args.compute_unc_variations or args.compute_rel_weights ) and args.dataset != 'data'
         if compute_variations:
-            print(f'key_central {key_central} \n all_dataframes[key_central][0] {all_dataframes[key_central][0]}')# \n col_types_central {col_types_central} col_names_central {col_names_central}')
+            # print(f'key_central {key_central} \n all_dataframes[key_central][0] {all_dataframes[key_central][0]}')# \n col_types_central {col_types_central} col_names_central {col_names_central}')
             all_dataframes[key_central][0] = createCentralQuantities(all_dataframes[key_central][0], col_types_central, col_names_central)
+            print(f'key_central {key_central} \n all_dataframes[key_central][0] {all_dataframes[key_central][0]}')# \n col_types_central {col_types_central} col_names_central {col_names_central}')
+            # print(f'all_dataframes[key_central][0].Display("map_placeholder").Print() {all_dataframes[key_central][0].Display("map_placeholder").Print()}')
+            # print(f'all_dataframes[key_central][0].Display().Print() {all_dataframes[key_central][0].Display().Print()}')
             # print(f'all_dataframes[key_central][0].Count().GetValue() {all_dataframes[key_central][0].Count().GetValue()}')
             # print(f'all_dataframes[key_central][0].GetColumnNames() {all_dataframes[key_central][0].GetColumnNames()}')
             # print(f'all_dataframes[key_central][0].Describe() {all_dataframes[key_central][0].Filter("map_placeholder > 0").Describe()}')
+            # try:
+            #     count = all_dataframes[key_central][0].Filter("map_placeholder>0").Count().GetValue()
+            #     print(f'Count passed filter {count}')
+            # except Exception as e:
+            #     print(f"Caught exception before crash {e}")
             if all_dataframes[key_central][0].Filter("map_placeholder > 0").Count().GetValue() <= 0 : raise RuntimeError("no events passed map placeolder")
         # norm weight histograms
         if compute_rel_weights_not_data:
