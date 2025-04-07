@@ -87,7 +87,7 @@ def GetHistogramDictFromDataframes(var, all_dataframes, key_2 , key_filter_dict,
 
         if var in boosted_variables and uncName in unc_to_not_consider_boosted: continue
         total_weight_expression = analysis.GetWeight(ch,cat,boosted_categories) if sample_type!='data' else "1"
-    
+
         weight_name = "final_weight"
         if not isCentral:
             if type(unc_cfg_dict)==dict:
@@ -287,6 +287,7 @@ if __name__ == "__main__":
 
             all_dataframes[key_central] = [new_dfWrapped_Central.df]
         central_histograms = GetHistogramDictFromDataframes(args.var, all_dataframes,  key_central , key_filter_dict, unc_cfg_dict['norm'],hist_cfg_dict, global_cfg_dict, args.furtherCut, False)
+
 
         # central quantities definition
         compute_variations = ( args.compute_unc_variations or args.compute_rel_weights ) and args.dataset != 'data'
