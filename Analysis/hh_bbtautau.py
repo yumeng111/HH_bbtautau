@@ -83,7 +83,8 @@ def GetWeight(channel, cat, boosted_categories):
     #      weights_to_apply.extend(["weight_Jet_PUJetID_Central_b1_2", "weight_Jet_PUJetID_Central_b2_2"])
     # else:
     #     weights_to_apply.extend(["weight_pNet_Central"])
-    weights_to_apply.extend(["weight_pNet_Central"])
+    if cat in boosted_categories:
+        weights_to_apply.extend(["weight_pNet_Central"])
     total_weight = '*'.join(weights_to_apply)
     return total_weight
 
