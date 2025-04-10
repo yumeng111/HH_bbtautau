@@ -3,7 +3,7 @@ if __name__ == "__main__":
     sys.path.append(os.environ['ANALYSIS_PATH'])
 
 from FLAF.Analysis.HistHelper import *
-from FLAF.Analysis.GetCrossWeights import *
+from Analysis.GetCrossWeights import *
 # from Analysis.GetTauTauWeights import *
 from FLAF.Common.Utilities import *
 
