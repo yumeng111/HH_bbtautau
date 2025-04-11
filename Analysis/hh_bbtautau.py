@@ -280,8 +280,9 @@ class DataFrameBuilderForHistograms(DataFrameBuilderBase):
         self.config = config
         self.bTagWPString = bTagWPString
         self.pNetWPstring = pNetWPstring
-        self.pNetWP = 0.3086 #temporary placeholder
-        self.bTagWP = 0.047 #temporary placeholder
+        #yumeng
+        self.pNetWP = 0.0499 #WorkingPointsParticleNet[period][pNetWPstring]
+        self.bTagWP = 0.3196 #WorkingPointsDeepFlav[period][bTagWPString]
         self.period = period
         self.region = region
         self.isData = isData
