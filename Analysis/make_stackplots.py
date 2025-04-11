@@ -1,7 +1,7 @@
 import os
 
 era = "Run3_2022"
-ver = "initial_test"
+ver = "v1"
 indir = f"/eos/user/t/toakhter/HH_bbtautau_Run3/histograms/{ver}/{era}/merged/"
 plotdir = f"/eos/user/t/toakhter/HH_bbtautau_Run3/histograms/{ver}/{era}/plots/"
 
