@@ -3,6 +3,7 @@ import os
 era = "ERA_string"
 ver = "your_version"
 indir = f"/eos/user/u/username/HH_bbtautau_Run3/histograms/{ver}/{era}/merged/"
+plotdir = f"/eos/user/t/toakhter/HH_bbtautau_Run3/histograms/{ver}/{era}/plots/"
 varnames = ["tau1_pt", "tau2_pt", "b1_pt", "b2_pt", "tautau_m_vis", "bb_m_vis", "MT2"] #"bbtautau_mass"
 
 channellist = ["eE", "eMu", "muMu", "eTau", "muTau", "tauTau"]
