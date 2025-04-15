@@ -66,7 +66,6 @@ def GetBTagWeight(global_cfg_dict,cat,applyBtag=False):
     else:
         if cat not in global_cfg_dict['boosted_categories'] and not cat.startswith("baseline"):
             btagshape_weight = "weight_bTagShape_Central"
-    print('debug segfault: GetBTagWeight', f'{btag_weight}*{btagshape_weight}')
     return f'{btag_weight}*{btagshape_weight}'
 
 
