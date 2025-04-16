@@ -7,14 +7,30 @@ from Analysis.GetCrossWeights import *
 # from Analysis.GetTauTauWeights import *
 from FLAF.Common.Utilities import *
 
-def workingPoints(global_cfg_dict):
-    from Corrections.Corrections import Corrections
-    from Corrections.btag import bTagCorrProducer
-    print(global_cfg_dict)
-    Corrections.initializeGlobal(global_cfg_dict, sample_name=None, isData=False, load_corr_lib=True)
-    if 'btag' in Corrections.getGlobal().to_apply:
-        wp_value = bTagCorrProducer.getWPValues
-    print('workingPoints')
+WorkingPointsParticleNet = {
+        "Run3_2022":{
+            "Loose":0.047, # /cvmfs/cms.cern.ch/rsync/cms-nanoAOD/jsonpog-integration/POG/BTV/2022_Summer22/btagging.json.gz
+            "Medium":0.245,
+            "Tight":0.6734
+        },
+        "Run3_2022EE":{
+            "Loose":0.0499,
+            "Medium":0.2605,
+            "Tight":0.6915
+        }
+}
+WorkingPointsDeepFlav = {
+        "Run3_2022":{
+            "Loose":0.0583,
+            "Medium":0.3086,
+            "Tight":0.7183
+        },
+        "Run3_2022EE":{
+            "Loose":0.0614,
+            "Medium":0.3196,
+            "Tight":0.73
+        }
+}
 
 def createKeyFilterDict(global_cfg_dict, year):
     reg_dict = {}
@@ -84,8 +100,6 @@ def GetWeight(channel, cat, boosted_categories):
     #      weights_to_apply.extend(["weight_Jet_PUJetID_Central_b1_2", "weight_Jet_PUJetID_Central_b2_2"])
     # else:
     #     weights_to_apply.extend(["weight_pNet_Central"])
-    if cat in boosted_categories:
-        weights_to_apply.extend(["weight_pNet_Central"])
     total_weight = '*'.join(weights_to_apply)
     return total_weight
 
@@ -281,9 +295,8 @@ class DataFrameBuilderForHistograms(DataFrameBuilderBase):
         self.config = config
         self.bTagWPString = bTagWPString
         self.pNetWPstring = pNetWPstring
-        #yumeng
-        self.pNetWP = 0.0499 #WorkingPointsParticleNet[period][pNetWPstring]
-        self.bTagWP = 0.3196 #WorkingPointsDeepFlav[period][bTagWPString]
+        self.pNetWP = WorkingPointsParticleNet[period][pNetWPstring]
+        self.bTagWP = WorkingPointsDeepFlav[period][bTagWPString]
         self.period = period
         self.region = region
         self.isData = isData
