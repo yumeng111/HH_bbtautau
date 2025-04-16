@@ -56,6 +56,7 @@ def GetBTagWeight(global_cfg_dict,cat,applyBtag=False):
 
 def GetWeight(channel, cat, boosted_categories):
     weights_to_apply = ["weight_MC_Lumi_pu"]#, "weight_L1PreFiring_Central","weight_L1PreFiring_ECAL_Central", "weight_L1PreFiring_Muon_Central"]
+    #return "weight_MC_Lumi_pu"
     trg_weights_dict = {
         'eTau':["weight_HLT_singleEle"],#["weight_HLT_eTau", "weight_HLT_singleTau", "weight_HLT_MET"],
         'muTau':["weight_HLT_singleMu"],#["weight_HLT_muTau", "weight_HLT_singleTau", "weight_HLT_MET"],

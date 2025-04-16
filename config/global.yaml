@@ -38,6 +38,7 @@ corrections:
 tagger_name: particleNet
 bjet_preselection_branch : "Jet_bCand"
 
+#yumeng
 channelSelection:
     - eTau
     - muTau
@@ -62,15 +63,19 @@ boosted_categories:
   # - boosted_masswindow
   # - boosted_cat2_masswindow
   - boosted_cat3_masswindow
+
 categories:
   - inclusive
-  - btag_shape
-  - baseline
-  - boosted_baseline
-  - boosted_baseline_cat3
+  # - btag_shape
+  # - baseline
+  
+  # - boosted_baseline
+  # - boosted_baseline_cat3
   #- boosted_baseline_masswindow
   #- boosted_baseline_cat3_masswindow
   # - res0b_inclusive
+  
+#yumeng: cat? for res1b and res2b
   # - res1b_inclusive
   # - res2b_inclusive
   # - boosted
