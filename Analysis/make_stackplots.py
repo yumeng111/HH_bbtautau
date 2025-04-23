@@ -25,4 +25,7 @@ for var in varnames:
 
         else:
             filename = os.path.join(indir, var, 'tmp', f"all_histograms_{var}_hadded.root")
-            os.system(f"python3 ../FLAF/Analysis/HistPlotter.py --inFile {filename} --bckgConfig ../config/background_samples.yaml --globalConfig ../config/global.yaml --outFile {outname} --var {var} --category {cat} --channel {channel} --uncSource Central --wantData --year {era} --wantQCD False --rebin False --analysis HH_bbtautau --qcdregion OS_Iso --sigConfig ../config/{era}/samples.yaml --wantSignals")
+            if var == "MT2":
+                os.system(f"python3 ../FLAF/Analysis/HistPlotter.py --inFile {filename} --bckgConfig ../config/background_samples.yaml --globalConfig ../config/global.yaml --outFile {outname} --var {var} --category {cat} --channel {channel} --uncSource Central --year {era} --wantQCD False --rebin False --analysis HH_bbtautau --qcdregion OS_Iso --sigConfig ../config/{era}/samples.yaml --wantSignals")    
+            else:
+                os.system(f"python3 ../FLAF/Analysis/HistPlotter.py --inFile {filename} --bckgConfig ../config/background_samples.yaml --globalConfig ../config/global.yaml --outFile {outname} --var {var} --category {cat} --channel {channel} --uncSource Central --wantData --year {era} --wantQCD False --rebin False --analysis HH_bbtautau --qcdregion OS_Iso --sigConfig ../config/{era}/samples.yaml --wantSignals")

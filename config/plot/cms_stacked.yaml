@@ -65,7 +65,7 @@ ana_text:
   align: left_bottom
 
 scope_text:
-  text: "Private work"
+  text: "Preliminary" #"Private work"
   pos_ref: cms_text
   pos: [ 0.012, -0.1 ]
   text_size: 0.04

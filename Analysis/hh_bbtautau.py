@@ -36,7 +36,7 @@ def createKeyFilterDict(global_cfg_dict, year):
     reg_dict = {}
     filter_str = ""
     channels_to_consider = global_cfg_dict['channels_to_consider']
-    qcd_regions_to_consider = global_cfg_dict['QCDRegions']
+    qcd_regions_to_consider = global_cfg_dict['SignRegions']
     categories_to_consider = global_cfg_dict["categories"] + global_cfg_dict["boosted_categories"]
     boosted_categories = global_cfg_dict["boosted_categories"]
     triggers_dict = global_cfg_dict['hist_triggers']
@@ -72,7 +72,6 @@ def GetBTagWeight(global_cfg_dict,cat,applyBtag=False):
 
 def GetWeight(channel, cat, boosted_categories):
     weights_to_apply = ["weight_MC_Lumi_pu"]#, "weight_L1PreFiring_Central","weight_L1PreFiring_ECAL_Central", "weight_L1PreFiring_Muon_Central"]
-    #return "weight_MC_Lumi_pu"
     trg_weights_dict = {
         'eTau':["weight_HLT_singleEle"],#["weight_HLT_eTau", "weight_HLT_singleTau", "weight_HLT_MET"],
         'muTau':["weight_HLT_singleMu"],#["weight_HLT_muTau", "weight_HLT_singleTau", "weight_HLT_MET"],
