@@ -51,7 +51,7 @@ deepTauVersion: 2p5
 region: SR
 region_default: SR
 channels: ""
-QCDRegions:
+SignRegions: #QCDRegions:
   - OS_Iso
   - SS_Iso
   - OS_AntiIso
@@ -70,28 +70,29 @@ categories:
   - boosted_baseline_cat3
   #- boosted_baseline_masswindow
   #- boosted_baseline_cat3_masswindow
-  # - res0b_inclusive
-  # - res1b_inclusive
-  # - res2b_inclusive
-  # - boosted
+  - res0b_inclusive
+  - res1b_inclusive
+  - res2b_inclusive
+  - boosted
+  - boosted_cat3
   # - res0b_cat2
   # - res1b_cat2
   # - res2b_cat2
-  # - res2b_cat3
-  # - res1b_cat3
-  # - res0b_cat3
-  - inclusive_masswindow
-  - btag_shape_masswindow
-  - baseline_masswindow
+  - res2b_cat3
+  - res1b_cat3
+  - res0b_cat3
+  # - inclusive_masswindow
+  # - btag_shape_masswindow
+  # - baseline_masswindow
   # - res0b_inclusive_masswindow
   # - res1b_inclusive_masswindow
   # - res2b_inclusive_masswindow
   # - res0b_cat2_masswindow
   # - res1b_cat2_masswindow
   # - res2b_cat2_masswindow
-  - res2b_cat3_masswindow
-  - res1b_cat3_masswindow
-  - res0b_cat3_masswindow
+  # - res2b_cat3_masswindow
+  # - res1b_cat3_masswindow
+  # - res0b_cat3_masswindow
 
 
 storeExtraJets: False
@@ -173,7 +174,7 @@ category_definition:
   # w/o mass window
 
   # boosted_baseline: "(SelectedFatJet_p4[fatJet_sel].size()>0)"
-  inclusive:  "!(boosted_baseline)"
+  inclusive:  "b2_pt>0" #"!(boosted_baseline)"
   btag_shape: "!(boosted_baseline)"
   baseline: "return true;"
   res0b_inclusive: "nSelBtag == 0"
