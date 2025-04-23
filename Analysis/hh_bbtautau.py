@@ -36,7 +36,7 @@ def createKeyFilterDict(global_cfg_dict, year):
     reg_dict = {}
     filter_str = ""
     channels_to_consider = global_cfg_dict['channels_to_consider']
-    qcd_regions_to_consider = global_cfg_dict['QCDRegions']
+    qcd_regions_to_consider = global_cfg_dict['SignRegions']
     categories_to_consider = global_cfg_dict["categories"] + global_cfg_dict["boosted_categories"]
     boosted_categories = global_cfg_dict["boosted_categories"]
     triggers_dict = global_cfg_dict['hist_triggers']
