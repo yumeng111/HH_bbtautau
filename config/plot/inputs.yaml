@@ -28,11 +28,6 @@
    - W
   title: "W #rightarrow l#nu + jets"
   color: kOrange+1
-- name: W
-  types:
-   - W
-  title: "W #rightarrow l#nu + jets"
-  color: kOrange+1
 - name: single_H
   title: "H"
   types:
