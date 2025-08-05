@@ -28,7 +28,7 @@ corrections:
   - tauES
   - JEC
   - JER
-  - trg
+  - trgEff
   # - btagWP
   - btagShape
   - mu
@@ -135,7 +135,7 @@ channelDefinition:
 triggers:
   eTau: [ singleEle, etau]
   muTau: [singleMu, mutau]
-  tauTau: [ditau]#, ditaujet]
+  tauTau: [ditau , ditaujet]
   eE: [singleEle]
   eMu: [singleMu]
   muMu: [singleMu]

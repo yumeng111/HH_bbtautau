@@ -5,6 +5,7 @@ from Corrections.Corrections import Corrections
 loadTF = True
 loadHHBtag = True
 lepton_legs = [ "tau1", "tau2" ]
+offline_legs = [ "tau1", "tau2", "b1", "b2"]
 
 deepTauScores= ["rawDeepTau2017v2p1VSe","rawDeepTau2017v2p1VSmu",
             "rawDeepTau2017v2p1VSjet", "rawDeepTau2018v2p5VSe", "rawDeepTau2018v2p5VSmu",
@@ -73,7 +74,7 @@ FatJetObservablesMC = ["hadronFlavour","partonFlavour"]
 SubJetObservables = ["btagDeepB", "eta", "mass", "phi", "pt", "rawFactor"]
 SubJetObservablesMC = ["hadronFlavour","partonFlavour"]
 
-defaultColToSave = ["entryIndex","luminosityBlock", "run","event", "sample_type", "sample_name", "period", "X_mass", "X_spin", "isData","PuppiMET_pt", "PuppiMET_phi", "nJet","DeepMETResolutionTune_pt", "DeepMETResolutionTune_phi","DeepMETResponseTune_pt", "DeepMETResponseTune_phi","PV_npvs"]
+defaultColToSave = ["FullEventId","luminosityBlock", "run","event", "sample_type", "period", "X_mass", "X_spin", "isData","PuppiMET_pt", "PuppiMET_phi", "nJet","DeepMETResolutionTune_pt", "DeepMETResolutionTune_phi","DeepMETResponseTune_pt", "DeepMETResponseTune_phi","PV_npvs"]
 
 def getDefaultColumnsToSave(isData):
     colToSave = defaultColToSave.copy()
@@ -81,7 +82,7 @@ def getDefaultColumnsToSave(isData):
         colToSave.extend(['Pileup_nTrueInt'])
     return colToSave
 
-def addAllVariables(dfw, syst_name, isData, trigger_class, lepton_legs, isSignal, global_params, channels):
+def addAllVariables(dfw, syst_name, isData, trigger_class, lepton_legs, isSignal, applyTriggerFilter, global_params, channels):
     dfw.Apply(AnaBaseline.RecoHttCandidateSelection, global_params)
     dfw.Apply(AnaBaseline.RecoJetSelection, global_params["era"])
     dfw.Apply(AnaBaseline.ThirdLeptonVeto)
@@ -106,12 +107,24 @@ def addAllVariables(dfw, syst_name, isData, trigger_class, lepton_legs, isSignal
                     dfw.DefineAndAppend(f"genLepton{gen_idx+1}_{var}", f"static_cast<float>(genHttCandidate->leg_p4[{gen_idx}].{var}())")
 
     dfw.DefineAndAppend(f"nBJets", f"Jet_p4[Jet_bCand].size()")
+
+    dfw.Define(f"ExtraJet_pt", f"v_ops::pt(Jet_p4[ExtraJet_B1])")
+    dfw.Define(f"ExtraJet_eta", f"v_ops::eta(Jet_p4[ExtraJet_B1])")
+    dfw.Define(f"ExtraJet_phi", f"v_ops::phi(Jet_p4[ExtraJet_B1])")
+    dfw.Define(f"ExtraJet_mass", f"v_ops::mass(Jet_p4[ExtraJet_B1])")
+    dfw.Define(f"ExtraJet_ptRes", f"Jet_ptRes[ExtraJet_B1]")
+    dfw.Define(f"ExtraJet_idx", f"CreateIndexes(ExtraJet_pt.size())")
+    dfw.Define(f"ExtraJet_p4", f"GetP4(ExtraJet_pt, ExtraJet_eta, ExtraJet_phi, ExtraJet_mass, ExtraJet_idx)")
+    dfw.Define(f"ExtraJet_legType", f"return ROOT::RVec<Leg>(ExtraJet_pt.size(), Leg::jet);")
+    dfw.Define(f"ExtraJet_decayMode", f"return ROOT::RVec<int>(ExtraJet_pt.size(), -2);") # dummy values
+
     if global_params["storeExtraJets"]:
         dfw.DefineAndAppend(f"ExtraJet_pt", f"v_ops::pt(Jet_p4[ExtraJet_B1])")
         dfw.DefineAndAppend(f"ExtraJet_eta", f"v_ops::eta(Jet_p4[ExtraJet_B1])")
         dfw.DefineAndAppend(f"ExtraJet_phi", f"v_ops::phi(Jet_p4[ExtraJet_B1])")
         dfw.DefineAndAppend(f"ExtraJet_mass", f"v_ops::mass(Jet_p4[ExtraJet_B1])")
         dfw.DefineAndAppend(f"ExtraJet_ptRes", f"Jet_ptRes[ExtraJet_B1]")
+
         for jetVar in jet_obs:
             if(f"Jet_{jetVar}" not in dfw.df.GetColumnNames()): continue
             dfw.DefineAndAppend(f"ExtraJet_{jetVar}", f"Jet_{jetVar}[ExtraJet_B1]")
@@ -130,15 +143,11 @@ def addAllVariables(dfw, syst_name, isData, trigger_class, lepton_legs, isSignal
     dfw.DefineAndAppend("metnomu_phi", f"static_cast<float>(GetMetNoMu(HttCandidate, {pf_str}_p4).phi())")
     for var in ["covXX", "covXY", "covYY"]:
         dfw.DefineAndAppend(f"met_{var}", f"static_cast<float>({pf_str}_{var})")
-
-    if trigger_class is not None:
-        hltBranches = dfw.Apply(trigger_class.ApplyTriggers, lepton_legs, 'Htt',isData, isSignal)
-        dfw.colToSave.extend(hltBranches)
+      
     dfw.Define(f"Tau_recoJetMatchIdx", f"FindMatching(Tau_p4, Jet_p4, 0.5)")
     dfw.Define(f"Muon_recoJetMatchIdx", f"FindMatching(Muon_p4, Jet_p4, 0.5)")
     dfw.Define( f"Electron_recoJetMatchIdx", f"FindMatching(Electron_p4, Jet_p4, 0.5)")
     dfw.DefineAndAppend("channelId","static_cast<int>(HttCandidate.channel())")
-    print(channels)
     channel_to_select = " || ".join(f"HttCandidate.channel()==Channel::{ch}" for ch in channels)#global_params["channelSelection"])
     dfw.Filter(channel_to_select, "select channels")
     fatjet_obs = []
@@ -192,7 +201,7 @@ def addAllVariables(dfw, syst_name, isData, trigger_class, lepton_legs, isSignal
                 define_expr = f'{cond} ? ({define_expr}) : {default}'
             dfw.DefineAndAppend( f"tau{leg_idx+1}_{var_name}", define_expr)
 
-        LegVar('legType', f"HttCandidate.leg_type[{leg_idx}]", var_type='int', check_leg_type=False)
+        LegVar('legType', f"HttCandidate.leg_type[{leg_idx}]", check_leg_type=False)
         for var in [ 'pt', 'eta', 'phi', 'mass' ]:
             LegVar(var, f'HttCandidate.leg_p4[{leg_idx}].{var}()', var_type='float', default='-1.f')
         LegVar('charge', f'HttCandidate.leg_charge[{leg_idx}]', var_type='int')
@@ -238,22 +247,32 @@ def addAllVariables(dfw, syst_name, isData, trigger_class, lepton_legs, isSignal
         dfw.Define( f"tau{leg_idx+1}_p4", f"HttCandidate.leg_type.size() > {leg_idx} ? HttCandidate.leg_p4.at({leg_idx}) : LorentzVectorM()")
         dfw.Define( f"tau{leg_idx+1}_index", f"HttCandidate.leg_type.size() > {leg_idx} ? HttCandidate.leg_index.at({leg_idx}) : -1")
         dfw.Define( f"tau{leg_idx+1}_type", f"HttCandidate.leg_type.size() > {leg_idx} ? static_cast<int>(HttCandidate.leg_type.at({leg_idx})) : -1")
-
-        dfw.Define(f"b{leg_idx+1}_idx", f"Hbb_isValid ? HbbCandidate->leg_index[{leg_idx}] : -1")
+        # dfw.df.Print(f"tau{leg_idx+1}_type").Print()    
+        dfw.Define(f"b{leg_idx+1}_index", f"Hbb_isValid ? HbbCandidate->leg_index[{leg_idx}] : -1")
         dfw.DefineAndAppend(f"b{leg_idx+1}_ptRes",f"Hbb_isValid ? static_cast<float>(Jet_ptRes.at(HbbCandidate->leg_index[{leg_idx}])) : 0.f")
         dfw.DefineAndAppend(f"b{leg_idx+1}_pt", f"Hbb_isValid ? static_cast<float>(HbbCandidate->leg_p4[{leg_idx}].Pt()) : 0.f")
         dfw.DefineAndAppend(f"b{leg_idx+1}_pt_raw", f"Hbb_isValid ? static_cast<float>(Jet_pt.at(HbbCandidate->leg_index[{leg_idx}])) : 0.f")
         dfw.DefineAndAppend(f"b{leg_idx+1}_eta", f"Hbb_isValid ? static_cast<float>(HbbCandidate->leg_p4[{leg_idx}].Eta()) : 0.f")
         dfw.DefineAndAppend(f"b{leg_idx+1}_phi", f"Hbb_isValid ? static_cast<float>(HbbCandidate->leg_p4[{leg_idx}].Phi()) : 0.f")
         dfw.DefineAndAppend(f"b{leg_idx+1}_mass", f"Hbb_isValid ? static_cast<float>(HbbCandidate->leg_p4[{leg_idx}].M()) : 0.f")
+        # ###### capire perchè questo non viene definito
+        dfw.Define(f"b{leg_idx+1}_p4", f"Hbb_isValid ? HbbCandidate->leg_p4[{leg_idx}] : LorentzVectorM()")
+
+        dfw.Define(f"b{leg_idx+1}_legType", f"Hbb_isValid ? (Leg::jet) : (Leg::none)")
+        dfw.Define(f"b{leg_idx+1}_decayMode", f"-2") # dummy values
         if not isData:
             dfw.Define(f"b{leg_idx+1}_genJet_idx", f"Hbb_isValid ?  Jet_genJetIdx.at(HbbCandidate->leg_index[{leg_idx}]) : -1")
             for var in [ 'pt', 'eta', 'phi', 'mass' ]:
                 dfw.DefineAndAppend(f"b{leg_idx+1}_genJet_{var}", f"Hbb_isValid && b{leg_idx+1}_genJet_idx>=0 ? static_cast<float>(GenJet_p4.at(b{leg_idx+1}_genJet_idx).{var}()) : -1.f")
             if isSignal:
                 dfw.DefineAndAppend(f"b{leg_idx+1}_fromGenHbb", f"b{leg_idx+1}_genJet_idx>=0 ? GenJet_Hbb.at(b{leg_idx+1}_genJet_idx) : false")
-
         for jetVar in jet_obs:
             if(f"Jet_{jetVar}" not in dfw.df.GetColumnNames()): continue
             dfw.DefineAndAppend(f"b{leg_idx+1}_{jetVar}", f"Hbb_isValid ? Jet_{jetVar}.at(HbbCandidate->leg_index[{leg_idx}]) : 0")
         dfw.DefineAndAppend(f"b{leg_idx+1}_HHbtag", f"Hbb_isValid ?  static_cast<float>(Jet_HHBtagScore.at(HbbCandidate->leg_index[{leg_idx}])) : 0.f")
+
+    if trigger_class is not None:
+        hltBranches = dfw.Apply(trigger_class.ApplyTriggers, offline_legs, isData, applyTriggerFilter)
+        dfw.colToSave.extend(hltBranches)
+    # for leg_name in offline_legs:
+    #     dfw.Redefine(f"{leg_name}_legType", f"static_cast<int>({leg_name}_legType)")

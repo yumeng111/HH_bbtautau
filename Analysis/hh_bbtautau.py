@@ -94,7 +94,8 @@ def GetWeight(channel, cat, boosted_categories):
         }
 
     weights_to_apply.extend(ID_weights_dict[channel])
-    weights_to_apply.extend(trg_weights_dict[channel])
+    # weights_to_apply.extend(trg_weights_dict[channel])
+    
     # if cat not in boosted_categories:
     #      weights_to_apply.extend(["weight_Jet_PUJetID_Central_b1_2", "weight_Jet_PUJetID_Central_b2_2"])
     # else:
@@ -320,11 +321,11 @@ def PrepareDfForHistograms(dfForHistograms):
     dfForHistograms.defineChannels()
     dfForHistograms.defineLeptonPreselection()
     dfForHistograms.defineApplicationRegions()
-    if not dfForHistograms.isData:
-        dfForHistograms.definePNetSFs()
-        defineTriggerWeights(dfForHistograms)
-        if dfForHistograms.wantTriggerSFErrors and dfForHistograms.isCentral:
-            defineTriggerWeightsErrors(dfForHistograms)
+    # if not dfForHistograms.isData:
+    #     dfForHistograms.definePNetSFs()
+    #     defineTriggerWeights(dfForHistograms)
+    #     if dfForHistograms.wantTriggerSFErrors and dfForHistograms.isCentral:
+    #         defineTriggerWeightsErrors(dfForHistograms)
     dfForHistograms.defineCRs()
     dfForHistograms.defineCategories()
     dfForHistograms.defineQCDRegions()
