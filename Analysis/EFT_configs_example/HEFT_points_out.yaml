@@ -1,0 +1,120 @@
+# HEFT EFT Points Configuration
+# Define the EFT parameter points you want to generate
+# Format: ggHH_kl_X_kt_Y_c2_Z_cg_W_c2g_V
+# Values: kl, kt, c2, cg, c2g (dimensionless couplings)
+# xs: cross-section in fb (femtobarns)
+
+# SM point (reference)
+ggHH_kl_1p00_kt_1p00_c2_0p00_cg_0p00_c2g_0p00:
+  kl: 1.0
+  kt: 1.0
+  c2: 0.0
+  cg: 0.0
+  c2g: 0.0
+  xs: 31.05  # SM gg->HH cross-section at 13 TeV
+
+# kl scan (varying kl, keeping others at SM values)
+ggHH_kl_0p00_kt_1p00_c2_0p00_cg_0p00_c2g_0p00:
+  kl: 0.0
+  kt: 1.0
+  c2: 0.0
+  cg: 0.0
+  c2g: 0.0
+  xs: 63.42
+
+ggHH_kl_2p45_kt_1p00_c2_0p00_cg_0p00_c2g_0p00:
+  kl: 2.45
+  kt: 1.0
+  c2: 0.0
+  cg: 0.0
+  c2g: 0.0
+  xs: 13.27
+
+ggHH_kl_5p00_kt_1p00_c2_0p00_cg_0p00_c2g_0p00:
+  kl: 5.0
+  kt: 1.0
+  c2: 0.0
+  cg: 0.0
+  c2g: 0.0
+  xs: 65.01
+
+# c2 scan
+ggHH_kl_1p00_kt_1p00_c2_m2p00_cg_0p00_c2g_0p00:
+  kl: 1.0
+  kt: 1.0
+  c2: -2.0
+  cg: 0.0
+  c2g: 0.0
+  xs: 18.23
+
+ggHH_kl_1p00_kt_1p00_c2_3p00_cg_0p00_c2g_0p00:
+  kl: 1.0
+  kt: 1.0
+  c2: 3.0
+  cg: 0.0
+  c2g: 0.0
+  xs: 45.67
+
+# kt scan
+ggHH_kl_1p00_kt_0p50_c2_0p00_cg_0p00_c2g_0p00:
+  kl: 1.0
+  kt: 0.5
+  c2: 0.0
+  cg: 0.0
+  c2g: 0.0
+  xs: 8.12
+
+ggHH_kl_1p00_kt_1p50_c2_0p00_cg_0p00_c2g_0p00:
+  kl: 1.0
+  kt: 1.5
+  c2: 0.0
+  cg: 0.0
+  c2g: 0.0
+  xs: 68.34
+
+# Benchmark points from ATLAS/CMS HH combination
+ggHH_kl_0p00_kt_1p00_c2_0p00_cg_0p00_c2g_0p00_benchmark1:
+  kl: 0.0
+  kt: 1.0
+  c2: 0.0
+  cg: 0.0
+  c2g: 0.0
+  xs: 63.42
+
+ggHH_kl_1p00_kt_1p00_c2_0p00_cg_0p00_c2g_0p00_benchmark2:
+  kl: 1.0
+  kt: 1.0
+  c2: 0.0
+  cg: 0.0
+  c2g: 0.0
+  xs: 31.05
+
+ggHH_kl_2p45_kt_1p00_c2_0p00_cg_0p00_c2g_0p00_benchmark3:
+  kl: 2.45
+  kt: 1.0
+  c2: 0.0
+  cg: 0.0
+  c2g: 0.0
+  xs: 13.27
+
+# 2D scan examples (kl, c2)
+ggHH_kl_m1p00_kt_1p00_c2_m1p00_cg_0p00_c2g_0p00:
+  kl: -1.0
+  kt: 1.0
+  c2: -1.0
+  cg: 0.0
+  c2g: 0.0
+  xs: 42.56
+
+ggHH_kl_2p00_kt_1p00_c2_2p00_cg_0p00_c2g_0p00:
+  kl: 2.0
+  kt: 1.0
+  c2: 2.0
+  cg: 0.0
+  c2g: 0.0
+  xs: 28.91
+
+# Note: Add more points as needed for your analysis
+# The cross-sections should match your generator predictions
+# For MadGraph5_aMC@NLO at NLO in QCD, use appropriate values for 13 or 13.6 TeV
+

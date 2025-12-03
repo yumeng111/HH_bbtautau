@@ -1,0 +1,142 @@
+# SMEFT EFT Points Configuration
+# Define the SMEFT parameter points you want to generate
+# Format: ggHH_CH_X_CHBox_Y_CHD_Z_CuH_W_CHG_V
+# Values: CH, CHBox, CHD, CuH, CHG (dimension-6 Wilson coefficients in TeV^-2)
+# xs: cross-section in fb (femtobarns)
+
+# SM point (all Wilson coefficients = 0)
+ggHH_CH_0p00_CHBox_0p00_CHD_0p00_CuH_0p00_CHG_0p00:
+  CH: 0.0
+  CHBox: 0.0
+  CHD: 0.0
+  CuH: 0.0
+  CHG: 0.0
+  xs: 31.05  # SM gg->HH cross-section at 13 TeV
+
+# CH scan (varying cH)
+ggHH_CH_1p00_CHBox_0p00_CHD_0p00_CuH_0p00_CHG_0p00:
+  CH: 1.0
+  CHBox: 0.0
+  CHD: 0.0
+  CuH: 0.0
+  CHG: 0.0
+  xs: 45.23
+
+ggHH_CH_m1p00_CHBox_0p00_CHD_0p00_CuH_0p00_CHG_0p00:
+  CH: -1.0
+  CHBox: 0.0
+  CHD: 0.0
+  CuH: 0.0
+  CHG: 0.0
+  xs: 38.67
+
+ggHH_CH_2p00_CHBox_0p00_CHD_0p00_CuH_0p00_CHG_0p00:
+  CH: 2.0
+  CHBox: 0.0
+  CHD: 0.0
+  CuH: 0.0
+  CHG: 0.0
+  xs: 72.45
+
+# CHBox scan (varying c2g in HEFT language)
+ggHH_CH_0p00_CHBox_1p00_CHD_0p00_CuH_0p00_CHG_0p00:
+  CH: 0.0
+  CHBox: 1.0
+  CHD: 0.0
+  CuH: 0.0
+  CHG: 0.0
+  xs: 42.13
+
+ggHH_CH_0p00_CHBox_m1p00_CHD_0p00_CuH_0p00_CHG_0p00:
+  CH: 0.0
+  CHBox: -1.0
+  CHD: 0.0
+  CuH: 0.0
+  CHG: 0.0
+  xs: 35.89
+
+# CHD scan
+ggHH_CH_0p00_CHBox_0p00_CHD_1p00_CuH_0p00_CHG_0p00:
+  CH: 0.0
+  CHBox: 0.0
+  CHD: 1.0
+  CuH: 0.0
+  CHG: 0.0
+  xs: 36.78
+
+ggHH_CH_0p00_CHBox_0p00_CHD_m1p00_CuH_0p00_CHG_0p00:
+  CH: 0.0
+  CHBox: 0.0
+  CHD: -1.0
+  CuH: 0.0
+  CHG: 0.0
+  xs: 39.12
+
+# CuH scan (top Yukawa modification)
+ggHH_CH_0p00_CHBox_0p00_CHD_0p00_CuH_1p00_CHG_0p00:
+  CH: 0.0
+  CHBox: 0.0
+  CHD: 0.0
+  CuH: 1.0
+  CHG: 0.0
+  xs: 28.34
+
+ggHH_CH_0p00_CHBox_0p00_CHD_0p00_CuH_m1p00_CHG_0p00:
+  CH: 0.0
+  CHBox: 0.0
+  CHD: 0.0
+  CuH: -1.0
+  CHG: 0.0
+  xs: 33.91
+
+# CHG scan (chromomagnetic dipole operator)
+ggHH_CH_0p00_CHBox_0p00_CHD_0p00_CuH_0p00_CHG_1p00:
+  CH: 0.0
+  CHBox: 0.0
+  CHD: 0.0
+  CuH: 0.0
+  CHG: 1.0
+  xs: 41.56
+
+ggHH_CH_0p00_CHBox_0p00_CHD_0p00_CuH_0p00_CHG_m1p00:
+  CH: 0.0
+  CHBox: 0.0
+  CHD: 0.0
+  CuH: 0.0
+  CHG: -1.0
+  xs: 37.23
+
+# 2D scan examples
+ggHH_CH_1p00_CHBox_1p00_CHD_0p00_CuH_0p00_CHG_0p00:
+  CH: 1.0
+  CHBox: 1.0
+  CHD: 0.0
+  CuH: 0.0
+  CHG: 0.0
+  xs: 58.92
+
+ggHH_CH_1p00_CHBox_0p00_CHD_1p00_CuH_0p00_CHG_0p00:
+  CH: 1.0
+  CHBox: 0.0
+  CHD: 1.0
+  CuH: 0.0
+  CHG: 0.0
+  xs: 52.34
+
+# Benchmark points for SMEFT studies
+ggHH_CH_0p50_CHBox_0p50_CHD_0p00_CuH_0p00_CHG_0p00:
+  CH: 0.5
+  CHBox: 0.5
+  CHD: 0.0
+  CuH: 0.0
+  CHG: 0.0
+  xs: 39.45
+
+# Note: 
+# 1. Cross-sections should be calculated with appropriate tools (MadGraph5_aMC@NLO + SMEFT@NLO)
+# 2. The relationship between HEFT and SMEFT:
+#    - HEFT kl <-> SMEFT: combination of CH and CHBox
+#    - HEFT kt <-> SMEFT: related to CuH
+#    - HEFT c2 <-> SMEFT: related to CHBox and CHD
+# 3. SMEFT provides a more fundamental EFT framework valid at higher energies
+

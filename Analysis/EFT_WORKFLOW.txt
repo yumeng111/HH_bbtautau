@@ -1,0 +1,288 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║              EFT REWEIGHTING WORKFLOW FOR HH→bbττ ANALYSIS                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          SETUP PHASE (ONE TIME)                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    1. Copy Files from bbγγ Repository
+       ─────────────────────────────────
+       From HH_bbgg/Analysis/:
+       
+       ┌──────────────────────┐
+       │ Coefficients_EFT/    │  ──────┐
+       │ ├── 1D_mhh/          │        │
+       │ ├── 2D_cosThetaStar/ │        │  Copy to
+       │ └── 3D_SMEFT/        │        │  HH_bbtautau/Analysis/
+       │                      │        │
+       │ configs/             │  ──────┘
+       │ ├── HEFT_points.yaml │
+       │ └── SMEFT_points.yaml│
+       └──────────────────────┘
+       
+       ✓ These files are UNIVERSAL (same for all HH channels)
+
+
+    2. Add Gen-Level Variables to Tuple Production
+       ────────────────────────────────────────────
+       
+       Modify: FLAF/AnaProd/anaTupleProducer.py
+       
+       Add C++ functions to calculate:
+       
+       ┌─────────────────────────────────────────┐
+       │  gen_mHH              (di-Higgs mass)   │
+       │  gen_CosThetaStar_HH  (helicity angle)  │
+       │  gen_pT_HH            (di-Higgs pT)     │
+       └─────────────────────────────────────────┘
+       
+       ⚠️  CRITICAL: Must regenerate tuples!
+
+
+    3. Generate Normalization Files
+       ─────────────────────────────
+       
+       From RAW samples (NO CUTS!):
+       
+       NanoAOD Signal Samples
+              ↓
+       Calculate gen_mHH, gen_CosThetaStar, gen_pT_HH
+              ↓
+       Fill histograms in kinematic bins
+              ↓
+       Save to Normalisation_EFT_reweight/
+              ↓
+       ┌──────────────────────────────────────────┐
+       │ Normalisation_EFT_GluGluToHH.txt         │
+       │ Normalisation_EFT_GluGlutoHHto2B2Tau*.txt│
+       └──────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         PROCESSING PHASE (PER ERA)                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    Input: Signal Parquet Files (with selections applied)
+    ──────────────────────────────────────────────────────
+    
+    ┌─────────────────────────────────────────────────┐
+    │ GluGluToHH.parquet                              │
+    │ GluGlutoHHto2B2Tau_kl_1p00_kt_1p00_c2_0p00.parquet │
+    │ GluGlutoHHto2B2Tau_kl_0p00_kt_1p00_c2_0p00.parquet │
+    │ ... (other BSM points)                           │
+    └─────────────────────────────────────────────────┘
+                     ↓
+    ┌───────────────────────────────────────────────────┐
+    │  python Reweight_EFT_parquet.py                   │
+    │      -e Run3_2022                                 │
+    │      -o ./Reweighted_parquets/                    │
+    │      -d 1  (or 2 for 2D)                          │
+    │      --nominal-only                               │
+    └───────────────────────────────────────────────────┘
+                     ↓
+    ┌─────────────────────────────────────────────────┐
+    │              REWEIGHTING PROCESS                 │
+    │                                                  │
+    │  For each event:                                 │
+    │  1. Find kinematic bin (mHH, cosθ*, pT)         │
+    │  2. Calculate EFT polynomial A(x, λ)            │
+    │  3. Apply normalization correction              │
+    │  4. Compute weight w = A(λ)/A(SM) × N_corr      │
+    │                                                  │
+    │  For each EFT point in configs/*.yaml:          │
+    │  - HEFT: kl, kt, c2, cg, c2g                    │
+    │  - SMEFT: CH, CHBox, CHD, CuH, CHG              │
+    └─────────────────────────────────────────────────┘
+                     ↓
+    Output: Reweighted Parquet Files
+    ────────────────────────────────
+    
+    ┌─────────────────────────────────────────────────┐
+    │ GluGluToHHto2B2Tau_EFTReweighted_1D.parquet     │
+    │                                                  │
+    │ Contains ALL original columns PLUS:              │
+    │                                                  │
+    │ - weight_EFT_kl_1p00_kt_1p00_c2_0p00_... (SM)  │
+    │ - weight_EFT_kl_0p00_kt_1p00_c2_0p00_...       │
+    │ - weight_EFT_kl_2p45_kt_1p00_c2_0p00_...       │
+    │ - weight_EFT_kl_5p00_kt_1p00_c2_0p00_...       │
+    │ - ... (all points from config file)             │
+    │                                                  │
+    │ - weight_SMEFT_CH_0p00_CHBox_0p00_...  (if SMEFT)│
+    │ - weight_SMEFT_CH_1p00_CHBox_0p00_...          │
+    │ - ... (all SMEFT points)                        │
+    │                                                  │
+    │ + corresponding *_unc columns for uncertainties │
+    └─────────────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        USAGE IN ANALYSIS                                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    Read Reweighted Parquet File
+            ↓
+    ┌──────────────────────────────────────────────────┐
+    │  import pandas as pd                             │
+    │                                                   │
+    │  df = pd.read_parquet("..._EFTReweighted.parquet")│
+    │                                                   │
+    │  # Apply EFT weight for specific point            │
+    │  eft_point = "kl_2p45_kt_1p00_c2_0p00_..."      │
+    │  weight_col = f"weight_EFT_{eft_point}"          │
+    │                                                   │
+    │  # Total event weight                             │
+    │  df['total_weight'] = (df['nominal_weight'] *    │
+    │                        df[weight_col])            │
+    │                                                   │
+    │  # Fill histograms with EFT weights               │
+    │  hist = create_histogram(df['variable'],         │
+    │                          weights=df['total_weight'])│
+    └──────────────────────────────────────────────────┘
+            ↓
+    Use in Statistical Inference (Combine/pyhf)
+    ───────────────────────────────────────────
+    
+    Instead of separate signal samples for each EFT point,
+    use ONE sample with different weights!
+    
+    Benefits:
+    ✓ Save disk space
+    ✓ Consistent statistics across EFT points
+    ✓ Easy to scan EFT parameter space
+    ✓ Proper correlations between systematics
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                     PHYSICS: HOW IT WORKS                                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    EFT Reweighting Formula:
+    ────────────────────────
+    
+    For event i in kinematic bin x:
+    
+              ┌──────────────────────────────────────────┐
+              │   A(x_i, λ_target)      N_SM(x_i)        │
+    w_i(λ) =  │  ───────────────────  × ──────────  × C  │
+              │   A(x_i, λ_SM)         N_input(x_i)      │
+              └──────────────────────────────────────────┘
+    
+    Where:
+    • A(x, λ) = Σ a_n(x) × P_n(λ)  [EFT polynomial]
+    • x = (mHH, |cosθ*|, pT_HH)    [kinematic variables]
+    • λ = (kl, kt, c2, ...)         [EFT parameters]
+    • N_SM(x) = # SM events in bin (from normalization files)
+    • N_input(x) = # events in input sample
+    • C = normalization to preserve total cross-section
+    
+    
+    Why These Variables?
+    ────────────────────
+    
+    ┌──────────────────────────────────────────────────┐
+    │ gen_mHH           → Sensitive to resonances      │
+    │                     and threshold effects         │
+    │                                                   │
+    │ gen_CosThetaStar  → Probes spin structure of     │
+    │                     HH production                 │
+    │                                                   │
+    │ gen_pT_HH         → Sensitive to higher-order    │
+    │                     corrections and pQCD effects  │
+    └──────────────────────────────────────────────────┘
+    
+    These provide OPTIMAL discriminating power between different
+    EFT scenarios while maintaining numerical stability!
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      VERIFICATION CHECKLIST                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    Before Running:
+    ☐ Coefficients_EFT/ directory exists
+    ☐ configs/HEFT_points_out.yaml exists
+    ☐ configs/SMEFT_points_out.yaml exists (if not using --HEFT_only)
+    ☐ Normalisation_EFT_reweight/ files exist for your era
+    ☐ Input parquet files contain gen_mHH, gen_CosThetaStar_HH, gen_pT_HH
+    ☐ Cross-sections in config files match your generator
+    
+    After Running:
+    ☐ Output file exists in Reweighted_parquets/
+    ☐ Output contains weight_EFT_* columns
+    ☐ SM point weight is close to 1.0 (mean ± std)
+    ☐ All weights are positive
+    ☐ No NaN or Inf values in weights
+    
+    Test Commands:
+    
+    # Check SM weight distribution
+    python -c "
+    import pandas as pd
+    df = pd.read_parquet('output.parquet')
+    w = df['weight_EFT_kl_1p00_kt_1p00_c2_0p00_cg_0p00_c2g_0p00']
+    print(f'Mean: {w.mean():.3f}, Std: {w.std():.3f}')
+    print(f'Min: {w.min():.3f}, Max: {w.max():.3f}')
+    "
+    
+    Expected: Mean ≈ 1.0, Std < 0.5
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         TROUBLESHOOTING GUIDE                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    Problem: Missing gen-level variables
+    ────────────────────────────────────
+    Error: "KeyError: 'gen_mHH'"
+    
+    Solution:
+    1. Check if variables exist: df.columns
+    2. Add to tuple production (see SUMMARY.md Step 2)
+    3. Or use add_gen_HH_variables.py for post-processing
+    
+    
+    Problem: FileNotFoundError for coefficients
+    ───────────────────────────────────────────
+    Error: "FileNotFoundError: Coefficients_EFT/1D_mhh/..."
+    
+    Solution:
+    1. Copy Coefficients_EFT/ from bbγγ repository
+    2. Verify directory structure matches expected layout
+    
+    
+    Problem: Weights are not ~1 for SM
+    ──────────────────────────────────
+    Symptom: weight_EFT_kl_1p00_... has mean >> 1 or << 1
+    
+    Likely causes:
+    • Incorrect normalization files
+    • Wrong cross-sections in config
+    • Mismatch between input samples and normalization
+    
+    Solution:
+    1. Regenerate normalization from RAW samples (no cuts!)
+    2. Verify cross-sections in HEFT_points_out.yaml
+    3. Check that same MC samples used for norm and reweighting
+    
+    
+    Problem: Very large or very small weights
+    ─────────────────────────────────────────
+    Symptom: Some weights > 100 or < 0.01
+    
+    This can happen for:
+    • Extreme EFT parameter values
+    • Events in kinematic regions with poor statistics
+    • Numerical instabilities
+    
+    Solutions:
+    • Apply weight caps in your analysis
+    • Remove extreme EFT points
+    • Increase statistics in input samples
+
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                               GOOD LUCK! 🚀                                  ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
