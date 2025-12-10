@@ -8,15 +8,18 @@ import pickle
 import warnings
 warnings.filterwarnings("ignore", message=".*DataFrame is highly fragmented.*") ## just to avoid a lot of Performancewarnings 
 
+## Initializing parser
 parser = argparse.ArgumentParser(description = "EFT Reweighting for HH->bbtautau from parquet")
-parser.add_argument('-e', '--era', type=str, dest='era', required=True, choices=['Run3_2022postEE', 'Run3_2022preEE', 'Run3_2022', 'Run3_2023preBPix', 'Run3_2023postBPix', 'Run3_2023'], help='Era to chose, choices available: Run3_2022postEE, Run3_2022preEE, Run3_2022, Run3_2023preBPix, Run3_2023postBPix, Run3_2023')
+parser.add_argument('-e', '--era', type=str, dest='era', required=True, choices=['Run3_2022', 'Run3_2022EE', 'Run3_2023', 'Run3_2023BPix'], help='Era to chose, choices available: Run3_2022, Run3_2022EE, Run3_2023, Run3_2023BPix')
 parser.add_argument('-o', '--output', type=str, dest='output', default="./Reweighted_parquets/", help='output folder to save reweighted parquet files and control plots')
 parser.add_argument('--HEFT_only', action='store_true', dest='HEFT_only', default=False, help='If true, process only HEFT. If false, process HEFT and SMEFT weights. Default is False')
+#change
 parser.add_argument('--map_eras_file', type=str, dest='map_eras_file', default="./docs/v2/map_eras.yaml", help='Path to the map eras file. Default is ./docs/v2/map_eras.yaml')
 parser.add_argument('--nominal-only', action='store_true', dest='nominal_only', default=True, help='If true, process only nominal components')
 parser.add_argument('--SM-only', action='store_true', dest='SM_only', default=False, help='If true, process only SM sample. If false, process all samples. Default is False.')
 parser.add_argument('--No-SM', action='store_true', dest='No_SM', default=False, help='If true, do not include SM sample in input samples. Default is False.')
 parser.add_argument('-d','--dim', type=int, dest='dim', default=1, help='Dimension of the HEFT reweighting. 1 or 2. Default is 1. Only 3D for SMEFT.')
+#change
 parser.add_argument('--coeffs-from_arxiv-2304-01968', action='store_true', dest='coeffs_from_arxiv', default=False, help='If true and 1D, use the 1D coefficients from arxiv-2304-01968 for HEFT. Default is False. If False, use the coefficients from Matheus Study. SMEFT only from arxiv 2502.20976')
 parser.add_argument('--use-variables-file', action='store_true', dest='use_variables_file', default=False, help='If true, use the variables file to select the variables to read. If false, read all variables in the parquet files. Default is False.')
 parser.add_argument('--input-parquet-dir', type=str, dest='input_parquet_dir', default=None, help='Directory containing input parquet files. If not specified, will use map_eras_file.')
@@ -34,15 +37,15 @@ elif args.era == "Run3_2023":
     run_eras = ["Run3_2023", "Run3_2023BPix"]
 else:
     run_eras = [args.era]
-
 dim = args.dim
 if dim not in [1,2]:
     raise ValueError("Dimension must be 1 or 2. You provided: {}".format(dim))
+#change
 coeffs_from_arxiv = args.coeffs_from_arxiv
 map_eras_file = args.map_eras_file
+
 use_variables_file = args.use_variables_file
 No_SM = args.No_SM
-
 if SM_only and No_SM:
     raise ValueError("Impossible to have at the same time SM_only and No_SM.")
 
@@ -55,11 +58,10 @@ def read_yaml(yaml_file):
 
 def read_parket_pd(path, sample, cat, era, columns=None, type_correction="nominal"):
     """Read parquet file and return pandas dataframe
-    
     Args:
         path: path to parquet file or directory
         sample: sample name
-        cat: category (not used in bbtautau, kept for compatibility)
+        cat: category
         era: era string
         columns: list of columns to read (if None, read all)
         type_correction: systematic variation type
@@ -82,7 +84,6 @@ def read_parket_pd(path, sample, cat, era, columns=None, type_correction="nomina
         df = pd.read_parquet(parquet_path, columns=list(columns.keys()))
     else:
         df = pd.read_parquet(parquet_path)
-    
     return df
 
 def exist_or_make(path):
@@ -94,7 +95,6 @@ if args.input_parquet_dir is None and map_eras_file is not None:
     map_eras = read_yaml(map_eras_file)
 else:
     map_eras = None
-
 if use_variables_file:
     variables_file = "configs/variables.yaml"  
     all_variables = read_yaml(variables_file)
@@ -102,8 +102,7 @@ else:
     all_variables = {} # Here, we do not use the variables file, we directly take all variables in the file
 
 # Get the input samples to reweight
-# For bbtautau, the signal sample names should be like: GluGluToHHTo2B2Tau_kl_X_kt_Y_c2_Z
-pattern_signals_keys = r"^GluGlutoHHto2B2Tau_kl_([0-9]+[pm][0-9]+)_kt_([0-9]+[pm][0-9]+)_c2_([0-9]+[pm][0-9]+)$"
+pattern_signals_keys = r"^GluGlutoHHto2B2Tau_kl_([0-9]+[pm][0-9]{2})_kt_([0-9]+[pm][0-9]{2})_c2_([0-9]+[pm][0-9]{2})$"
 
 if map_eras is not None:
     list_samples_file = map_eras[run_eras[0]]['list_samples']
@@ -116,7 +115,6 @@ else:
         for file in os.listdir(args.input_parquet_dir):
             if file.endswith('.parquet') and re.match(pattern_signals_keys, file.replace('.parquet', '')):
                 signals.append(file.replace('.parquet', ''))
-
 print("Signals : ")
 print(signals)
 
@@ -126,6 +124,7 @@ if not No_SM:
 signal_SM = ["GluGluToHH"] # Define the input parquet files for the SM signal
 signals_tot = list(np.unique(signals + signal_SM)) if not SM_only else signal_SM # If SM_only is True, only keep the SM signal
 
+#???from here
 corrections_types = ["nominal","Et_dependent_ScaleEB_down","Et_dependent_ScaleEB_up","Et_dependent_ScaleEE_down","Et_dependent_ScaleEE_up","Et_dependent_Smearing_down","Et_dependent_Smearing_up","jec_syst_Total_down","jec_syst_Total_up","jer_syst_down","jer_syst_up"]
 if nominal_only:
     corrections_types = ["nominal"] # For most samples, this is given without other samples than nominal and thus there is no subfolders
